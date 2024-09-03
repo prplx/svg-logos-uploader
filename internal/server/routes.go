@@ -5,31 +5,30 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/a-h/templ"
 	"svg-logos-uploader/cmd/web"
+
+	"svg-logos-uploader/internal/config"
+
+	"github.com/a-h/templ"
 )
 
-func (s *Server) RegisterRoutes() http.Handler {
+func (s *Server) RegisterRoutes(cfg *config.Config) http.Handler {
 	r := gin.Default()
 
-	r.GET("/", s.HelloWorldHandler)
-
 	r.Static("/assets", "./cmd/web/assets")
-
-	r.GET("/web", func(c *gin.Context) {
-		templ.Handler(web.HelloForm()).ServeHTTP(c.Writer, c.Request)
-	})
 
 	r.POST("/hello", func(c *gin.Context) {
 		web.HelloWebHandler(c.Writer, c.Request)
 	})
 
+	r.GET("/login", func(c *gin.Context) {
+		loginError := c.Query("error") == "true"
+		templ.Handler(web.LoginForm(loginError)).ServeHTTP(c.Writer, c.Request)
+	})
+
+	r.POST("/login", func(c *gin.Context) {
+		web.LoginHandler(c, cfg)
+	})
+
 	return r
-}
-
-func (s *Server) HelloWorldHandler(c *gin.Context) {
-	resp := make(map[string]string)
-	resp["message"] = "Hello World"
-
-	c.JSON(http.StatusOK, resp)
 }

@@ -2,12 +2,15 @@ package main
 
 import (
 	"fmt"
+	"svg-logos-uploader/internal/config"
 	"svg-logos-uploader/internal/server"
+
+	_ "github.com/joho/godotenv/autoload"
 )
 
 func main() {
-
-	server := server.NewServer()
+	config := config.MustLoadConfig()
+	server := server.NewServer(config)
 
 	err := server.ListenAndServe()
 	if err != nil {

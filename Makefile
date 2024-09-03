@@ -23,7 +23,7 @@ clean:
 	@rm -f main
 
 # Live Reload
-watch:
+air:
 	@if command -v air > /dev/null; then \
 	    air; \
 	    echo "Watching...";\
@@ -39,4 +39,10 @@ watch:
 	    fi; \
 	fi
 
-.PHONY: all build run test clean
+tailwindcss:
+	@npx tailwindcss -i ./cmd/web/assets/css/input.css -o ./cmd/web/assets/css/output.css --watch
+
+templ:
+	@templ generate --watch cmd/web/**/*
+
+.PHONY: all build run test clean run/watch air tailwindcss templ

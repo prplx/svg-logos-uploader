@@ -1,0 +1,32 @@
+package web
+
+templ LoginForm(loginError bool) {
+	@Base() {
+    <div class="w-full h-full flex items-center justify-center">
+    <div class="w-full max-w-md bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-2xl font-semibold text-gray-800 text-center mb-6">Login</h2>
+        if loginError {
+            <div id="error-message" class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <span class="block sm:inline">Invalid username or password.</span>
+            </div> 
+        }
+        <form action="#" method="POST">
+            <div class="mb-4">
+                <label for="username" class="block text-gray-700 font-semibold mb-2">Username</label>
+                <input type="text" id="username" name="username" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500" placeholder="Enter your username" required>
+            </div>
+
+            <div class="mb-6">
+                <label for="password" class="block text-gray-700 font-semibold mb-2">Password</label>
+                <input type="password" id="password" name="password" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500" placeholder="Enter your password" required>
+            </div>
+
+            <div class="mb-6">
+                <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 rounded-md transition duration-300">Login</button>
+            </div>
+        </form>
+    </div>
+    </div>
+	}
+}
+

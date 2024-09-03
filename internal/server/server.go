@@ -3,27 +3,24 @@ package server
 import (
 	"fmt"
 	"net/http"
-	"os"
-	"strconv"
 	"time"
 
-	_ "github.com/joho/godotenv/autoload"
+	"svg-logos-uploader/internal/config"
 )
 
 type Server struct {
 	port int
 }
 
-func NewServer() *http.Server {
-	port, _ := strconv.Atoi(os.Getenv("PORT"))
+func NewServer(cfg *config.Config) *http.Server {
 	NewServer := &Server{
-		port: port,
+		port: cfg.Port,
 	}
 
 	// Declare Server config
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", NewServer.port),
-		Handler:      NewServer.RegisterRoutes(),
+		Handler:      NewServer.RegisterRoutes(cfg),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
