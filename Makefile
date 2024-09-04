@@ -1,4 +1,7 @@
-# Simple Makefile for a Go project
+exist := $(wildcard .envrc)
+ifneq ($(strip $(exist)),)
+  include .envrc
+endif
 
 # Build the application
 all: build

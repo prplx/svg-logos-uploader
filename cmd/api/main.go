@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"svg-logos-uploader/internal/config"
 	"svg-logos-uploader/internal/server"
-
-	_ "github.com/joho/godotenv/autoload"
 )
 
 func main() {

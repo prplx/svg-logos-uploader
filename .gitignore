@@ -23,8 +23,9 @@ tmp/
 .idea
 
 # .env file
-.env
+.envrc
 
 # Project build
 main
 *templ.go
+uploads

@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"svg-logos-uploader/cmd/web"
+	"svg-logos-uploader/cmd/web/handlers"
 
 	"svg-logos-uploader/internal/config"
 
@@ -17,17 +18,23 @@ func (s *Server) RegisterRoutes(cfg *config.Config) http.Handler {
 
 	r.Static("/assets", "./cmd/web/assets")
 
-	r.POST("/hello", func(c *gin.Context) {
-		web.HelloWebHandler(c.Writer, c.Request)
-	})
-
 	r.GET("/login", func(c *gin.Context) {
 		loginError := c.Query("error") == "true"
 		templ.Handler(web.LoginForm(loginError)).ServeHTTP(c.Writer, c.Request)
 	})
 
 	r.POST("/login", func(c *gin.Context) {
-		web.LoginHandler(c, cfg)
+		handlers.LoginHandler(c, cfg)
+	})
+
+	r.GET("/", authMiddleware(cfg), func(c *gin.Context) {
+		uploadError := c.Query("error") == "true"
+		uploadSuccess := c.Query("success") == "true"
+		templ.Handler(web.UploadForm(uploadError, uploadSuccess)).ServeHTTP(c.Writer, c.Request)
+	})
+
+	r.POST("/upload", authMiddleware(cfg), func(c *gin.Context) {
+		handlers.UploadHandler(c, cfg)
 	})
 
 	return r
