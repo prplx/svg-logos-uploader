@@ -10,6 +10,7 @@ type Config struct {
 	AdminLogin        string `env:"ADMIN_LOGIN" env-required:"true"`
 	AdminPassword     string `env:"ADMIN_PASSWORD" env-required:"true"`
 	JWTSecret         string `env:"JWT_SECRET" env-required:"true"`
+	GithubAccessToken string `env:"GITHUB_ACCESS_TOKEN" env-required:"true"`
 	SessionCookieName string `env:"SESSION_COOKIE_NAME" env-default:"session"`
 }
 
