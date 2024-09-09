@@ -12,6 +12,7 @@ type Config struct {
 	JWTSecret         string `env:"JWT_SECRET" env-required:"true"`
 	GithubAccessToken string `env:"GITHUB_ACCESS_TOKEN" env-required:"true"`
 	SessionCookieName string `env:"SESSION_COOKIE_NAME" env-default:"session"`
+	UploadTimeout     int    `env:"UPLOAD_TIMEOUT" env-default:"60"`
 }
 
 func MustLoadConfig() *Config {

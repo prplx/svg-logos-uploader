@@ -6,6 +6,8 @@ import (
 	"os"
 	"svg-logos-uploader/internal/config"
 	"svg-logos-uploader/internal/server"
+
+	"github.com/gin-gonic/gin"
 )
 
 const (
@@ -15,6 +17,11 @@ const (
 func main() {
 	config := config.MustLoadConfig()
 	logger := setupLogger(config.Env)
+
+	if config.Env == envProd {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	server := server.NewServer(config, logger)
 
 	err := server.ListenAndServe()

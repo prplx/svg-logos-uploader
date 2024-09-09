@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -19,13 +18,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	uploadsDir = "uploads"
+	owner      = "prplx"
+	repo       = "svg-logos"
+	mainBranch = "master"
+)
+
 func UploadHandler(c *gin.Context, cfg *config.Config, logger *slog.Logger) {
 	log := logger.With("op", "cmd/web/handlers/upload")
-	context, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	context, cancel := context.WithTimeout(context.Background(), time.Duration(cfg.UploadTimeout)*time.Second)
 
 	defer cancel()
 
-	uploadsDir := "uploads"
 	if _, err := os.Stat(uploadsDir); os.IsNotExist(err) {
 		err = os.Mkdir(uploadsDir, 0755)
 		if err != nil {
@@ -56,7 +61,7 @@ func UploadHandler(c *gin.Context, cfg *config.Config, logger *slog.Logger) {
 	}
 
 	githubClient := github.NewGithubClient(cfg.GithubAccessToken)
-	_, dirContent, err := githubClient.GetRepositoryContent(context, "prplx", "svg-logos", "svg")
+	_, dirContent, err := githubClient.GetRepositoryContent(context, owner, repo, "svg")
 	if err != nil {
 		log.Error("cannot get repository content: ", sl.Err(err))
 		c.Redirect(http.StatusSeeOther, "/?error=true")
@@ -83,7 +88,35 @@ func UploadHandler(c *gin.Context, cfg *config.Config, logger *slog.Logger) {
 		return
 	}
 
-	fmt.Println(buf.String())
+	err = os.WriteFile(uploadsDir+"/README.md", []byte(buf.String()), 0644)
+	if err != nil {
+		log.Error("cannot write markdown to file: ", sl.Err(err))
+		c.Redirect(http.StatusSeeOther, "/?error=true")
+		return
+	}
+
+	branchName := github.GenerateBranchNameFromUploadedFiles(fileNames)
+
+	err = githubClient.CreateBranch(context, owner, repo, mainBranch, branchName)
+	if err != nil {
+		log.Error("cannot create branch: ", sl.Err(err))
+		c.Redirect(http.StatusSeeOther, "/?error=true")
+		return
+	}
+
+	err = githubClient.CreateTree(context, owner, repo, branchName, append(fileNames, uploadsDir+"/README.md"))
+	if err != nil {
+		log.Error("cannot create tree: ", sl.Err(err))
+		c.Redirect(http.StatusSeeOther, "/?error=true")
+		return
+	}
+
+	err = githubClient.CreatePullRequest(context, owner, repo, branchName, mainBranch, github.GenerateCommitMessageFromUploadedFiles(append(fileNames, uploadsDir+"/README.md")))
+	if err != nil {
+		log.Error("cannot create pull request: ", sl.Err(err))
+		c.Redirect(http.StatusSeeOther, "/?error=true")
+		return
+	}
 
 	c.Redirect(http.StatusSeeOther, "/?success=true")
 }
