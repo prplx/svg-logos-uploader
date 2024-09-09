@@ -14,7 +14,7 @@ RUN ["templ", "generate"]
 FROM golang:latest AS build-stage
 COPY --from=generate-stage /app /app
 WORKDIR /app
-RUN CGO_ENABLED=0 GOOS=linux go build -o /app/app
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=${ARCH} go build -ldflags="-w -s" -o /app/app cmd/api/main.go
 
 # Deploy
 FROM gcr.io/distroless/base-debian12 AS deploy-stage
