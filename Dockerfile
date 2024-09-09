@@ -1,35 +1,25 @@
-FROM golang:alpine as builder
+# Fetch
+FROM golang:latest AS fetch-stage
+COPY go.mod go.sum /app/
+WORKDIR /app
+RUN go mod download
 
-ARG ARCH="arm64"
+# Generate
+FROM ghcr.io/a-h/templ:latest AS generate-stage
+COPY --chown=65532:65532 . /app
+WORKDIR /app
+RUN ["templ", "generate"]
 
-RUN apk update && apk add --no-cache git ca-certificates && update-ca-certificates
+# Build
+FROM golang:latest AS build-stage
+COPY --from=generate-stage /app /app
+WORKDIR /app
+RUN CGO_ENABLED=0 GOOS=linux go build -o /app/app
 
-ENV USER=appuser
-ENV UID=10001
-
-RUN adduser \    
-    --disabled-password \    
-    --gecos "" \    
-    --home "/nonexistent" \    
-    --shell "/sbin/nologin" \    
-    --no-create-home \    
-    --uid "${UID}" \    
-    "${USER}"
-    
-WORKDIR $GOPATH/src/svg-logos-downloader
-
-COPY . .
-
-RUN go mod download && go mod verify
-RUN GOOS=linux GOARCH=${ARCH} go build -ldflags="-w -s" -o /go/bin/svg-logos-downloader cmd/api/main.go
-
-FROM scratch
-
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder /etc/passwd /etc/passwd
-COPY --from=builder /etc/group /etc/group
-COPY --from=builder /go/bin/svg-logos-downloader /go/bin/svg-logos-downloader
-
-USER appuser:appuser
-
-ENTRYPOINT ["/go/bin/svg-logos-downloader"]
+# Deploy
+FROM gcr.io/distroless/base-debian12 AS deploy-stage
+WORKDIR /
+COPY --from=build-stage /app/app /app
+EXPOSE 8083
+USER nonroot:nonroot
+ENTRYPOINT ["/app"]
