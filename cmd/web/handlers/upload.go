@@ -118,5 +118,12 @@ func UploadHandler(c *gin.Context, cfg *config.Config, logger *slog.Logger) {
 		return
 	}
 
+	err = os.RemoveAll(uploadsDir)
+	if err != nil {
+		log.Error("cannot remove uploads directory: ", sl.Err(err))
+		c.Redirect(http.StatusSeeOther, "/?error=true")
+		return
+	}
+
 	c.Redirect(http.StatusSeeOther, "/?success=true")
 }
