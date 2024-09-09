@@ -8,12 +8,13 @@ import (
 	"svg-logos-uploader/cmd/web"
 	"svg-logos-uploader/cmd/web/handlers"
 
+	"log/slog"
 	"svg-logos-uploader/internal/config"
 
 	"github.com/a-h/templ"
 )
 
-func (s *Server) RegisterRoutes(cfg *config.Config) http.Handler {
+func (s *Server) RegisterRoutes(cfg *config.Config, log *slog.Logger) http.Handler {
 	r := gin.Default()
 
 	r.Static("/assets", "./cmd/web/assets")
@@ -24,7 +25,7 @@ func (s *Server) RegisterRoutes(cfg *config.Config) http.Handler {
 	})
 
 	r.POST("/login", func(c *gin.Context) {
-		handlers.LoginHandler(c, cfg)
+		handlers.LoginHandler(c, cfg, log)
 	})
 
 	r.GET("/", authMiddleware(cfg), func(c *gin.Context) {
@@ -34,7 +35,7 @@ func (s *Server) RegisterRoutes(cfg *config.Config) http.Handler {
 	})
 
 	r.POST("/upload", authMiddleware(cfg), func(c *gin.Context) {
-		handlers.UploadHandler(c, cfg)
+		handlers.UploadHandler(c, cfg, log)
 	})
 
 	return r

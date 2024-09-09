@@ -18,7 +18,7 @@ func NewGithubClient(token string) *GithubClient {
 	}
 }
 
-func (gc *GithubClient) GetRepositories(ctx context.Context) (*github.RepositoryContent, error) {
-	content, _, _, err := gc.client.Repositories.GetContents(ctx, "prplx", "svg-logos", "README.md", nil)
-	return content, err
+func (gc *GithubClient) GetRepositoryContent(ctx context.Context, user, repo, path string) (*github.RepositoryContent, []*github.RepositoryContent, error) {
+	content, dirContent, _, err := gc.client.Repositories.GetContents(ctx, user, repo, path, nil)
+	return content, dirContent, err
 }
