@@ -17,7 +17,8 @@ import (
 func (s *Server) RegisterRoutes(cfg *config.Config, log *slog.Logger) http.Handler {
 	r := gin.Default()
 
-	r.Static("/assets", "./cmd/web/assets")
+	// r.Static("/assets", "./cmd/web/assets")
+	r.StaticFS("/assets/css", http.FS(web.Files))
 
 	r.GET("/login", func(c *gin.Context) {
 		loginError := c.Query("error") == "true"
